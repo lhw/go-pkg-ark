@@ -188,6 +188,13 @@ func (a *ARKRcon) DestroyAllEnemies() error {
 	return a.emptyResponse("destroyallenemies")
 }
 
+func (a *ARKRcon) SpawnDino(blueprint string, x_off, y_off, z_off, level int) error {
+	/* CMD: spawndino blueprintPath x_offset y_offset z_offset level
+	   Success: TBD
+	*/
+	return a.emptyResponse(fmt.Sprintf(`spawndino %s %d %d %d %d`, blueprint, x_off, y_off, z_off, level))
+}
+
 /*
   No idea how to get ark player id yet
   Just keep them in mind for now
