@@ -52,4 +52,4 @@ Available at https://godoc.org/github.com/lhw/go-pkg-ark
 
 ## License
 
-See [LICENSE](../blob/master/LICENSE)
+See [LICENSE](../master/LICENSE)
