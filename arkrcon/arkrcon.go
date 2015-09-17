@@ -1,5 +1,5 @@
 // Package ark provides the basic RCON commands for an ARK Surival Server
-package ark
+package arkrcon
 
 import (
   "github.com/james4k/rcon"

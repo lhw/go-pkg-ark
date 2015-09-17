@@ -9,7 +9,7 @@ Tested only on Linux so far.
 In order to use the library:
 
 ```golang
-go get github.com/lhw/go-pkg-ark
+go get github.com/lhw/go-pkg-ark/arkrcon
 ```
 
 ### Example
@@ -18,7 +18,7 @@ go get github.com/lhw/go-pkg-ark
 package main
 
 import (
-  arkrcon "github.com/lhw/go-pkg-ark"
+  "github.com/lhw/go-pkg-ark/arkrcon"
   "fmt"
 )
 
