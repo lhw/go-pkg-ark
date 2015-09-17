@@ -1,3 +1,4 @@
+// Package ark provides the basic RCON commands for an ARK Surival Server
 package ark
 
 import (
@@ -36,6 +37,7 @@ var (
   http://steamcommunity.com/sharedfiles/filedetails/?id=454529617
 */
 
+// ListPlayers returns a list of online players or an empty list
 func (a *ARKRcon) ListPlayers() ([]ARKPlayer, error) {
   /* CMD: listplayers
      Success: 
@@ -84,6 +86,8 @@ func (a *ARKRcon) SendChatToID(steam64, message string) error {
   return a.emptyResponse(fmt.Sprintf(`serverchatto "%s" "%s"`, steam64, message))
 }
 
+// GetChat returns a list of chat messages since the last call to getchat or
+// an empty list in case there were none
 func (a *ARKRcon) GetChat() ([]ARKChatMsg, error) {
   /* CMD: getchat
     Success: - SERVER: foo
@@ -103,6 +107,7 @@ func (a *ARKRcon) GetChat() ([]ARKChatMsg, error) {
   return list, nil
 }
 
+// SetTimeOfDay expects the time format to be hh:mm
 func (a *ARKRcon) SetTimeOfDay(time string) error {
   /* CMD: settimeofday
      Success: /
@@ -159,6 +164,7 @@ func (a *ARKRcon) UnbanPlayer(steam64 string) error {
   return a.simpleResponse(fmt.Sprintf(`unbanplayer %s`, steam64), fmt.Sprintf(`%s Unbanned`, steam64))
 }
 
+// Slomo modifier. Set to 1 to return to normal
 func (a *ARKRcon) Slomo(multiplier int) error {
   /* CMD: slomo multiplier
      Success: /
