@@ -172,6 +172,22 @@ func (a *ARKRcon) Slomo(multiplier int) error {
   return a.emptyResponse(fmt.Sprintf(`slomo %d`, multiplier))
 }
 
+// Dinos eventually respawn
+func (a *ARKRcon) DestroyWildDinos() error {
+  /* CMD: destroywilddinos
+     Success: /
+  */
+  return a.emptyResponse("destroywilddinos")
+}
+
+// Same as DestroyWildDinos but also kills tamed Dinos
+func (a *ARKRcon) DestroyAllEnemies() error {
+  /* CMD: destroyallenemies
+     Success: /
+  */
+  return a.emptyResponse("destroyallenemies")
+}
+
 /* 
   No idea how to get ark player id yet
   Just keep them in mind for now
