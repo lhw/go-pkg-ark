@@ -48,7 +48,7 @@ func main() {
 
 ## API Documentation
 
-Available at https://godoc.org/github.com/lhw/go-pkg-ark
+Available at https://godoc.org/github.com/lhw/go-pkg-ark/arkrcon
 
 ## License
 
