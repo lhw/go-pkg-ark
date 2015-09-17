@@ -23,6 +23,7 @@ type ARKChatMsg struct {
   Username string
   Playername string
   Message string
+  ServerMessage bool
 }
 
 var (
@@ -121,7 +122,7 @@ func (a *ARKRcon) GetChat() ([]ARKChatMsg, error) {
   list := make([]ARKChatMsg, 0)
   all := rex.FindAllStringSubmatch(resp, -1)
   for _, m := range all {
-    list = append(list, ARKChatMsg{m[1], m[2], m[3]})
+    list = append(list, ARKChatMsg{m[1], m[2], m[3], strings.HasPrefix(m[1], "SERVER")})
   }
   return list, nil
 }
