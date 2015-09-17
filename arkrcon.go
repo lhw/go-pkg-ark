@@ -60,52 +60,28 @@ func (a *ARKRcon) SaveWorld() error {
   /* CMD: saveworld
      Success: World Saved
    */
-  resp, err := a.Query("saveworld")
-  if err != nil {
-    return err
-  }
-  if !strings.Contains(resp, "World Saved") {
-    return FailResponse
-  }
-  return nil
+  return a.simpleResponse("saveworld", "World Saved")
 }
 
 func (a *ARKRcon) DoExit() error {
   /* CMD: doexit
      Success: Exiting...
   */
-  resp, err := a.Query("doexit")
-  if err != nil {
-    return err
-  }
-  if !strings.Contains(resp, "Exiting") {
-    return FailResponse
-  }
-  return nil
+  return a.simpleResponse("doexit", "Exiting")
 }
 
 func (a *ARKRcon) SendChatToPlayer(player, message string) error {
   /* CMD: serverchattoplayer "player" "msg"
      Success: /
   */
-  _, err := a.Query(fmt.Sprintf(`serverchattoplayer "%s" "%s"`, player, message))
-  if err == EmptyResponse {
-    return nil
-  } else {
-    return err
-  }
+  return a.emptyResponse(fmt.Sprintf(`serverchattoplayer "%s" "%s"`, player, message))
 }
 
 func (a *ARKRcon) SendChatToID(steam64, message string) error {
   /* CMD: serverchatto "steam64" "msg"
      Success: /
   */
-  _, err := a.Query(fmt.Sprintf(`serverchatto "%s" "%s"`, steam64, message))
-  if err == EmptyResponse {
-    return nil
-  } else {
-    return err
-  }
+  return a.emptyResponse(fmt.Sprintf(`serverchatto "%s" "%s"`, steam64, message))
 }
 
 func (a *ARKRcon) GetChat() ([]ARKChatMsg, error) {
@@ -131,124 +107,63 @@ func (a *ARKRcon) SetTimeOfDay(time string) error {
   /* CMD: settimeofday
      Success: /
   */
-  _, err := a.Query(fmt.Sprintf(`settimeofday %s`, time))
-  if err == EmptyResponse {
-    return nil
-  } else {
-    return err
-  }
+  return a.emptyResponse(fmt.Sprintf(`settimeofday %s`, time))
 }
 
 func (a *ARKRcon) WhitelistPlayer (steam64 string) error {
   /* CMD: allowplayertojoinnocheck steam64
      Success: <steam64> Allow Player To Join No Check
   */
-  resp, err := a.Query(fmt.Sprintf(`allowplayertojoinnocheck %s`, steam64))
-  if err != nil {
-    return err
-  }
-
-  if !strings.Contains(resp, fmt.Sprintf(`%s Allow`, steam64)) {
-    return FailResponse
-  }
-  return nil
+  return a.simpleResponse(fmt.Sprintf(`allowplayertojoinnocheck %s`, steam64), fmt.Sprintf(`%s Allow`, steam64))
 }
 
 func (a *ARKRcon) RemoveWhitelist (steam64 string) error {
   /* CMD: disallowplayertojoinnocheck steam64
      Success: <steam64> Disallowed Player To Join No Checknned
   */
-  resp, err := a.Query(fmt.Sprintf(`disallowplayertojoinnocheck %s`, steam64))
-  if err != nil {
-    return err
-  }
-
-  if !strings.Contains(resp, fmt.Sprintf(`%s Disallowed`, steam64)) {
-    return FailResponse
-  }
-  return nil
+  return a.simpleResponse(fmt.Sprintf(`disallowplayertojoinnocheck %s`, steam64), fmt.Sprintf(`%s Disallowed`, steam64))
 }
 
 func (a *ARKRcon) SetMessageOfTheDay (motd string) error {
   /* CMD: setmessageoftheday motd
      Success: Message of set to <motd>
   */
-
-  resp, err := a.Query(fmt.Sprintf(`setmessageoftheday %s`, motd))
-  if err != nil {
-    return err
-  }
-
-  if !strings.Contains(resp, "Message of set to") {
-    return FailResponse
-  }
-  return nil
+  return a.simpleResponse(fmt.Sprintf(`setmessageoftheday %s`, motd), "Message of set to")
 }
 
 func (a *ARKRcon) Broadcast(message string) error {
   /* CMD: broadcast
      Success: /
   */
-  _, err := a.Query(fmt.Sprintf(`broadcast %s`, message))
-  if err == EmptyResponse {
-    return nil
-  } else {
-    return err
-  }
+  return a.emptyResponse(fmt.Sprintf(`broadcast %s`, message))
 }
 
 func (a *ARKRcon) KickPlayer(steam64 string) error {
   /* CMD: kickplayer steam64
      Success: <steam64> Kicked
   */
-  resp, err := a.Query(fmt.Sprintf(`kickplayer %s`, steam64))
-  if err != nil {
-    return err
-  }
-  if !strings.Contains(resp, fmt.Sprintf(`%s Kicked`, steam64)) {
-    return FailResponse
-  }
-  return nil
+  return a.simpleResponse(fmt.Sprintf(`kickplayer %s`, steam64), fmt.Sprintf(`%s Kicked`, steam64))
 }
 
 func (a *ARKRcon) BanPlayer(steam64 string) error {
   /* CMD: banplayer steam64
      Success: <steam64> Banned
   */
-  resp, err := a.Query(fmt.Sprintf(`banplayer %s`, steam64))
-  if err != nil {
-    return err
-  }
-  if !strings.Contains(resp, fmt.Sprintf(`%s Banned`, steam64)) {
-    return FailResponse
-  }
-  return nil
+  return a.simpleResponse(fmt.Sprintf(`banplayer %s`, steam64), fmt.Sprintf(`%s Banned`, steam64))
 }
 
 func (a *ARKRcon) UnbanPlayer(steam64 string) error {
   /* CMD: unbanplayer steam64
      Success: <steam64> Unbanned
   */
-  resp, err := a.Query(fmt.Sprintf(`unbanplayer %s`, steam64))
-  if err != nil {
-    return err
-  }
-  if !strings.Contains(resp, fmt.Sprintf(`%s Unbanned`, steam64)) {
-    return FailResponse
-  }
-  return nil
+  return a.simpleResponse(fmt.Sprintf(`unbanplayer %s`, steam64), fmt.Sprintf(`%s Unbanned`, steam64))
 }
 
 func (a *ARKRcon) Slomo(multiplier int) error {
   /* CMD: slomo multiplier
      Success: /
   */
-  _, err := a.Query(fmt.Sprintf(`slomo %d`, multiplier))
-  if err == EmptyResponse {
-    return nil
-  } else {
-    return err
-  }
+  return a.emptyResponse(fmt.Sprintf(`slomo %d`, multiplier))
 }
 
 /* 
@@ -273,6 +188,26 @@ func (a *ARKRcon) giveExpToPlayer(playerID, exp int, fromtribe, preventshare boo
 
 func (a *ARKRcon) forcePlayerToJoinTribe(playerID, tribeID int) {
   //forceplayertojointribe
+}
+
+func (a *ARKRcon) emptyResponse(cmd string) error {
+  _, err := a.Query(cmd)
+  if err == EmptyResponse {
+    return nil
+  } else {
+    return err
+  }
+}
+
+func (a *ARKRcon) simpleResponse(cmd, exp string) error {
+  resp, err := a.Query(cmd)
+  if err != nil {
+    return err
+  }
+  if !strings.Contains(resp, exp) {
+    return FailResponse
+  }
+  return nil
 }
 
 func (a *ARKRcon) Query(cmd string) (string, error) {
