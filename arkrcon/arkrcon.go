@@ -28,6 +28,7 @@ type ARKChatMsg struct {
 }
 
 var (
+	NoConnection = errors.New("No connection to RCON")
 	EmptyResponse = errors.New("No Server Response")
 	FailResponse  = errors.New("Server failed at request")
 )
@@ -240,6 +241,10 @@ func (a *ARKRcon) simpleResponse(cmd, exp string) error {
 }
 
 func (a *ARKRcon) Query(cmd string) (string, error) {
+	if a == nil {
+		return "", NoConnection
+	}
+
 	reqID, reqErr := a.rc.Write(cmd)
 	if reqErr != nil {
 		log.Println(reqID, reqErr)
