@@ -5,14 +5,16 @@ import (
 	"errors"
 	"fmt"
 	"github.com/james4k/rcon"
-	"log"
+	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 type ARKRcon struct {
-	rc      *rcon.RemoteConsole
-	address string
+	rc       *rcon.RemoteConsole
+	address  string
+	password string
 }
 
 type ARKPlayer struct {
@@ -28,9 +30,14 @@ type ARKChatMsg struct {
 }
 
 var (
-	NoConnection = errors.New("No connection to RCON")
+	NoConnection  = errors.New("No connection to RCON")
 	EmptyResponse = errors.New("No Server Response")
-	FailResponse  = errors.New("Server failed at request")
+	FailResponse  = errors.New("Server failed at executing request")
+	EnvMissing    = errors.New("One or more environment Variables not set")
+
+	//RegEx
+	playerRegex = regexp.MustCompile(`\d+\. ([^,]+), (\d+)`)
+	chatRegex   = regexp.MustCompile(`(\w+)\s*(?:\(([\w\s]+)\))?:\s*(.*?)$`)
 )
 
 /*
@@ -39,24 +46,24 @@ var (
 */
 
 // ListPlayers returns a list of online players or an empty list
-func (a *ARKRcon) ListPlayers() ([]ARKPlayer, error) {
+func (a *ARKRcon) ListPlayers() (list []ARKPlayer, err error) {
 	/* CMD: listplayers
 	    Success:
 	   - No Players Connected
 	   - 0. CyFreeze, 76561198025588951
 	     ...
 	*/
-	resp, err := a.Query("listplayers")
-	if err != nil {
-		return nil, err
+	var resp string
+	if resp, err = a.Query("listplayers"); err != nil {
+		return
 	}
-	rex := regexp.MustCompile(`\d+\. ([^,]+), (\d+)`)
-	list := make([]ARKPlayer, 0)
-	all := rex.FindAllStringSubmatch(resp, -1)
+
+	list = make([]ARKPlayer, 0)
+	all := playerRegex.FindAllStringSubmatch(resp, -1)
 	for _, m := range all {
 		list = append(list, ARKPlayer{m[1], m[2]})
 	}
-	return list, nil
+	return
 }
 
 func (a *ARKRcon) SaveWorld() error {
@@ -89,23 +96,23 @@ func (a *ARKRcon) SendChatToID(steam64, message string) error {
 
 // GetChat returns a list of chat messages since the last call to getchat or
 // an empty list in case there were none
-func (a *ARKRcon) GetChat() ([]ARKChatMsg, error) {
+func (a *ARKRcon) GetChat() (list []ARKChatMsg, err error) {
 	/* CMD: getchat
 	   Success: - SERVER: foo
 	              CyFreeze (Bob The Builder): foobar
 	              Valki(Valki): wup wup
 	*/
-	resp, err := a.Query("getchat")
-	if err != nil {
-		return nil, err
+	var resp string
+	if resp, err = a.Query("getchat"); err != nil {
+		return
 	}
-	rex := regexp.MustCompile(`(\w+)\s*(?:\(([\w\s]+)\))?:\s*(.*?)$`)
-	list := make([]ARKChatMsg, 0)
-	all := rex.FindAllStringSubmatch(resp, -1)
+
+	list = make([]ARKChatMsg, 0)
+	all := chatRegex.FindAllStringSubmatch(resp, -1)
 	for _, m := range all {
 		list = append(list, ARKChatMsg{m[1], m[2], m[3], strings.HasPrefix(m[1], "SERVER")})
 	}
-	return list, nil
+	return
 }
 
 // SetTimeOfDay expects the time format to be hh:mm
@@ -229,44 +236,52 @@ func (a *ARKRcon) emptyResponse(cmd string) error {
 	}
 }
 
-func (a *ARKRcon) simpleResponse(cmd, exp string) error {
-	resp, err := a.Query(cmd)
-	if err != nil {
+func (a *ARKRcon) simpleResponse(cmd, exp string) (err error) {
+	var resp string
+	if resp, err = a.Query(cmd); err != nil {
 		return err
 	}
 	if !strings.Contains(resp, exp) {
 		return FailResponse
 	}
-	return nil
+	return
 }
 
-func (a *ARKRcon) Query(cmd string) (string, error) {
+func (a *ARKRcon) Query(cmd string) (resp string, err error) {
 	if a == nil {
 		return "", NoConnection
 	}
 
-	reqID, reqErr := a.rc.Write(cmd)
-	if reqErr != nil {
-		log.Println(reqID, reqErr)
-		return "", reqErr
+	if _, err = a.rc.Write(cmd); err != nil {
+		return
 	}
 
-	resp, respID, respErr := a.rc.Read()
-	if respErr != nil {
-		log.Println(resp, respID, respErr)
-		return "", respErr
+	if resp, _, err = a.rc.Read(); err != nil {
+		return
 	}
 
 	if strings.Contains(resp, "no response!!") {
 		return "", EmptyResponse
 	}
-	return resp, nil
+	return
 }
 
 func NewARKRconConnection(address, password string) (*ARKRcon, error) {
-	rc, err := rcon.Dial(address, password)
-	if err != nil {
+	var err error
+	var rc *rcon.RemoteConsole
+
+	if rc, err = rcon.Dial(address, password); err != nil {
 		return nil, err
 	}
-	return &ARKRcon{rc, address}, nil
+	return &ARKRcon{rc, address, password}, nil
+}
+
+func newARKRconConnectionEnv() (*ARKRcon, error) {
+	addr := os.Getenv("ADDRESS")
+	port, err := strconv.Atoi(os.Getenv("PORT"))
+	pass := os.Getenv("ADMIN_PASSWORD")
+	if addr == "" || pass == "" || err != nil {
+		return nil, EnvMissing
+	}
+	return NewARKRconConnection(fmt.Sprintf("%s:%d", addr, port), pass)
 }
